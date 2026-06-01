@@ -25,11 +25,11 @@ function xlml_parsexmltagobj(tag/*:string*/) {
 	if(m) for(i = 0; i != m.length; ++i) {
 		y = m[i].match(attregex2);
 /*:: if(!y || !y[2]) continue; */
-		if((j=y[1].indexOf(":")) === -1) z[y[1]] = y[2].slice(1,y[2].length-1);
+		if((j=y[1].indexOf(":")) === -1) { if(is_safe_key(y[1])) z[y[1]] = y[2].slice(1,y[2].length-1); }
 		else {
 			if(y[1].slice(0,6) === "xmlns:") w = "xmlns"+y[1].slice(6);
 			else w = y[1].slice(j+1);
-			z[w] = y[2].slice(1,y[2].length-1);
+			if(is_safe_key(w)) z[w] = y[2].slice(1,y[2].length-1);
 		}
 	}
 	return z;
@@ -56,7 +56,7 @@ function xlml_set_custprop(Custprops, key, cp, val/*:string*/) {
 		case "i8": case "string": case "fixed": case "uuid": case "bin.base64": break;
 		default: throw new Error("bad custprop:" + cp[0]);
 	}
-	Custprops[unescapexml(key)] = oval;
+	safe_set(Custprops, unescapexml(key), oval);
 }
 
 function safe_format_xlml(cell/*:Cell*/, nf, o) {

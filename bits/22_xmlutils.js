@@ -20,14 +20,14 @@ function parsexmltag(tag/*:string*/, skip_root/*:?boolean*/, skip_LC/*:?boolean*
 		for(j=0;j!=q.length;++j) if(q.charCodeAt(j) === 58) break;
 		if(j===q.length) {
 			if(q.indexOf("_") > 0) q = q.slice(0, q.indexOf("_")); // from ods
-			z[q] = v;
-			if(!skip_LC) z[q.toLowerCase()] = v;
+			if(is_safe_key(q)) z[q] = v;
+			if(!skip_LC && is_safe_key(q.toLowerCase())) z[q.toLowerCase()] = v;
 		}
 		else {
 			var k = (j===5 && q.slice(0,5)==="xmlns"?"xmlns":"")+q.slice(j+1);
 			if(z[k] && q.slice(j-3,j) == "ext") continue; // from ods
-			z[k] = v;
-			if(!skip_LC) z[k.toLowerCase()] = v;
+			if(is_safe_key(k)) z[k] = v;
+			if(!skip_LC && is_safe_key(k.toLowerCase())) z[k.toLowerCase()] = v;
 		}
 	}
 	return z;

@@ -3397,6 +3397,15 @@ var split_regex = /*#__PURE__*/(function() {
 		return o;
 	};
 })();
+
+function is_safe_key(key/*:string*/)/*:boolean*/ {
+	return key !== "__proto__" && key !== "constructor" && key !== "prototype";
+}
+function safe_set(obj/*:any*/, key/*:string*/, val/*:any*/)/*:boolean*/ {
+	if(!is_safe_key(key)) return false;
+	obj[key] = val;
+	return true;
+}
 function getdatastr(data)/*:?string*/ {
 	if(!data) return null;
 	if(data.content && data.type) return cc2str(data.content, true);
@@ -3524,14 +3533,14 @@ function parsexmltag(tag/*:string*/, skip_root/*:?boolean*/, skip_LC/*:?boolean*
 		for(j=0;j!=q.length;++j) if(q.charCodeAt(j) === 58) break;
 		if(j===q.length) {
 			if(q.indexOf("_") > 0) q = q.slice(0, q.indexOf("_")); // from ods
-			z[q] = v;
-			if(!skip_LC) z[q.toLowerCase()] = v;
+			if(is_safe_key(q)) z[q] = v;
+			if(!skip_LC && is_safe_key(q.toLowerCase())) z[q.toLowerCase()] = v;
 		}
 		else {
 			var k = (j===5 && q.slice(0,5)==="xmlns"?"xmlns":"")+q.slice(j+1);
 			if(z[k] && q.slice(j-3,j) == "ext") continue; // from ods
-			z[k] = v;
-			if(!skip_LC) z[k.toLowerCase()] = v;
+			if(is_safe_key(k)) z[k] = v;
+			if(!skip_LC && is_safe_key(k.toLowerCase())) z[k.toLowerCase()] = v;
 		}
 	}
 	return z;
@@ -5315,6 +5324,7 @@ function parse_cust_props(data/*:string*/, opts) {
 				var toks = x.split('>');
 				var type = toks[0].slice(4), text = toks[1];
 				/* 22.4.2.32 (CT_Variant). Omit the binary types from 22.4 (Variant Types) */
+				if(!is_safe_key(name)) break;
 				switch(type) {
 					case 'lpstr': case 'bstr': case 'lpwstr':
 						p[name] = unescapexml(text);

@@ -1,8 +1,8 @@
 {
-	"name": "xlsx",
-	"version": "0.18.5",
-	"author": "sheetjs",
-	"description": "SheetJS Spreadsheet data parser and writer",
+	"name": "@eriche/xlsx",
+	"version": "0.18.5-patch.1",
+	"author": "eriche",
+	"description": "SheetJS Spreadsheet data parser and writer - CVE-2023-30533 patched fork",
 	"keywords": [
 		"excel",
 		"xls",
@@ -72,7 +72,8 @@
 		"tests-only": "make travis",
 		"build": "make",
 		"lint": "make fullint",
-		"dtslint": "dtslint types"
+		"dtslint": "dtslint types",
+		"prepublishOnly": "npm test"
 	},
 	"config": {
 		"blanket": {
@@ -97,5 +98,8 @@
 	"license": "Apache-2.0",
 	"engines": {
 		"node": ">=0.8"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

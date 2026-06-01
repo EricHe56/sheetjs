@@ -3343,6 +3343,16 @@ var split_regex = (function() {
 		return o;
 	};
 })();
+
+function is_safe_key(key) {
+	return key !== "__proto__" && key !== "constructor" && key !== "prototype";
+}
+
+function safe_set(obj, key, val) {
+	if(!is_safe_key(key)) return false;
+	obj[key] = val;
+	return true;
+}
 function getdatastr(data) {
 	if(!data) return null;
 	if(data.content && data.type) return cc2str(data.content, true);
@@ -3470,14 +3480,14 @@ function parsexmltag(tag, skip_root, skip_LC) {
 		for(j=0;j!=q.length;++j) if(q.charCodeAt(j) === 58) break;
 		if(j===q.length) {
 			if(q.indexOf("_") > 0) q = q.slice(0, q.indexOf("_")); // from ods
-			z[q] = v;
-			if(!skip_LC) z[q.toLowerCase()] = v;
+			if(is_safe_key(q)) z[q] = v;
+			if(!skip_LC && is_safe_key(q.toLowerCase())) z[q.toLowerCase()] = v;
 		}
 		else {
 			var k = (j===5 && q.slice(0,5)==="xmlns"?"xmlns":"")+q.slice(j+1);
 			if(z[k] && q.slice(j-3,j) == "ext") continue; // from ods
-			z[k] = v;
-			if(!skip_LC) z[k.toLowerCase()] = v;
+			if(is_safe_key(k)) z[k] = v;
+			if(!skip_LC && is_safe_key(k.toLowerCase())) z[k.toLowerCase()] = v;
 		}
 	}
 	return z;
@@ -5561,6 +5571,7 @@ function parse_cust_props(data, opts) {
 				var toks = x.split('>');
 				var type = toks[0].slice(4), text = toks[1];
 				/* 22.4.2.32 (CT_Variant). Omit the binary types from 22.4 (Variant Types) */
+				if(!is_safe_key(name)) break;
 				switch(type) {
 					case 'lpstr': case 'bstr': case 'lpwstr':
 						p[name] = unescapexml(text);
@@ -17135,11 +17146,11 @@ function xlml_parsexmltagobj(tag) {
 	var m = tag.match(attregexg2), y, j, w, i;
 	if(m) for(i = 0; i != m.length; ++i) {
 		y = m[i].match(attregex2);
-if((j=y[1].indexOf(":")) === -1) z[y[1]] = y[2].slice(1,y[2].length-1);
+if((j=y[1].indexOf(":")) === -1) { if(is_safe_key(y[1])) z[y[1]] = y[2].slice(1,y[2].length-1); }
 		else {
 			if(y[1].slice(0,6) === "xmlns:") w = "xmlns"+y[1].slice(6);
 			else w = y[1].slice(j+1);
-			z[w] = y[2].slice(1,y[2].length-1);
+			if(is_safe_key(w)) z[w] = y[2].slice(1,y[2].length-1);
 		}
 	}
 	return z;
@@ -17166,7 +17177,7 @@ function xlml_set_custprop(Custprops, key, cp, val) {
 		case "i8": case "string": case "fixed": case "uuid": case "bin.base64": break;
 		default: throw new Error("bad custprop:" + cp[0]);
 	}
-	Custprops[unescapexml(key)] = oval;
+	safe_set(Custprops, unescapexml(key), oval);
 }
 
 function safe_format_xlml(cell, nf, o) {

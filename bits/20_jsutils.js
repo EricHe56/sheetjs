@@ -181,3 +181,13 @@ var split_regex = /*#__PURE__*/(function() {
 		return o;
 	};
 })();
+
+function is_safe_key(key/*:string*/)/*:boolean*/ {
+	return key !== "__proto__" && key !== "constructor" && key !== "prototype";
+}
+
+function safe_set(obj/*:any*/, key/*:string*/, val/*:any*/)/*:boolean*/ {
+	if(!is_safe_key(key)) return false;
+	obj[key] = val;
+	return true;
+}

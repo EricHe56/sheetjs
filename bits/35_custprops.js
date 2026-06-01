@@ -14,6 +14,7 @@ function parse_cust_props(data/*:string*/, opts) {
 				var toks = x.split('>');
 				var type = toks[0].slice(4), text = toks[1];
 				/* 22.4.2.32 (CT_Variant). Omit the binary types from 22.4 (Variant Types) */
+				if(!is_safe_key(name)) break;
 				switch(type) {
 					case 'lpstr': case 'bstr': case 'lpwstr':
 						p[name] = unescapexml(text);
